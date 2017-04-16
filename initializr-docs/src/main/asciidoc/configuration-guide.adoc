@@ -634,7 +634,7 @@ is a dependency with the web facet).
 
 A dependency group is a hint for user interface implememtations, to group things together
 for users when they are selecting dependencies. It is also a convenient way to share
-settings between dependencies because every dependency inherits all the settings. Th emost
+settings between dependencies because every dependency inherits all the settings. The most
 common settings in a group are the group id, version range (for Spring Boot versions), and
 bom. Example:
 
