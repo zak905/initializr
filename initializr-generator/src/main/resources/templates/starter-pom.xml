@@ -25,6 +25,9 @@
 		{{#buildPropertiesVersions}}
 		<{{key}}>{{#value}}{{.}}{{/value}}</{{key}}>
 		{{/buildPropertiesVersions}}
+		{{#hasGWTDependency}}
+		<serverPort>8080</serverPort>
+		{{/hasGWTDependency}}
 	</properties>
 
 	<dependencies>
@@ -151,6 +154,13 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+					{{#hasGWTDependency}}
+				        <configuration>
+							<jvmArguments>
+								-Dserver.port=${serverPort}
+							</jvmArguments>
+						</configuration>
+		           {{/hasGWTDependency}}
 			</plugin>
 			{{#groovy}}
 			<plugin>
@@ -250,5 +260,102 @@
 	</pluginRepositories>
 {{/isRelease}}
 
+{{#hasGWTDependency}}
+	<profiles>
+		<profile>
+			<id>gwt-dev</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/java</directory>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<groupId>net.ltgt.gwt.maven</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<version>1.0-rc-6</version>
+						<extensions>true</extensions>
+						<configuration>
+							<moduleName>{{gwtModuleLongName}}</moduleName>
+							<moduleShortName>{{gwtModuleName}}</moduleShortName>
+							<startupUrls>
+								<startupUrl>{{gwtModuleName}}.html</startupUrl>
+							</startupUrls>
+							<devmodeArgs>
+								<devmodeArg>-noserver</devmodeArg>
+								<devmodeArg>-port</devmodeArg>
+								<devmodeArg>${serverPort}</devmodeArg>
+							</devmodeArgs>
+							<forkDevmode>true</forkDevmode>
+							<classpathScope>compile</classpathScope>
+							<devmodeWorkDir>${project.build.directory}/classes/static</devmodeWorkDir>
+							<launcherDir>${project.build.directory}/classes/static</launcherDir>
+							<warDir>${project.build.directory}/classes/static</warDir>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>gwt-prod</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/java</directory>
+					</resource>
+				</resources>
+				<plugins>
+					<plugin>
+						<artifactId>maven-clean-plugin</artifactId>
+						<version>3.0.0</version>
+						<executions>
+							<execution>
+								<phase>compile</phase>
+								<goals>
+									<goal>clean</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+						<excludeDefaultDirectories>true</excludeDefaultDirectories>
+							<filesets>
+								<fileset>
+									<directory>${basedir}/src/main/resources/static/{{gwtModuleName}}</directory>
+								</fileset>
+							</filesets>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>net.ltgt.gwt.maven</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<version>1.0-rc-6</version>
+						<extensions>true</extensions>
+						<executions>
+							<execution>
+								<phase>compile</phase>
+								<goals>
+									<goal>generate-module</goal>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<moduleName>{{gwtModuleLongName}}</moduleName>
+							<moduleShortName>{{gwtModuleName}}</moduleShortName>
+							<startupUrls>
+								<startupUrl>{{gwtModuleName}}.html</startupUrl>
+							</startupUrls>
+							<classpathScope>compile</classpathScope>
+							<webappDirectory>${basedir}/src/main/resources/static</webappDirectory>
+							<workDir>${basedir}/src/main/resources/static</workDir>
+							<warDir>${basedir}/src/main/resources/static</warDir>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+{{/hasGWTDependency}}
 
 </project>

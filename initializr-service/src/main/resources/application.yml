@@ -8,6 +8,7 @@ server:
     enabled: true
     mime-types: application/json,text/css,text/html
     min-response-size: 2048
+    
 
 spring:
   jackson:
@@ -301,6 +302,13 @@ initializr:
               description: Creating CRUD UI with Vaadin
             - rel: reference
               href: https://vaadin.com/spring
+        - name: GWT
+          id: gwt
+          groupId: com.gwidgets
+          artifactId: gwt-spring-boot-starter
+          version: 1.0-SNAPSHOT
+          type: pom
+          description: GWT framework (version 2.8.0)
         - name: Rest Repositories
           id: data-rest
           weight: 10

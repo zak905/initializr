@@ -191,8 +191,10 @@ public class ProjectGenerator {
 	}
 
 	protected File doGenerateProjectStructure(ProjectRequest request) {
+		System.out.println(request.getDependencies());
 		Map<String, Object> model = resolveModel(request);
-
+		List<Dependency> dependencies = (List<Dependency>) model.get("compileDependencies");
+		System.out.println(model);
 		File rootDir;
 		try {
 			rootDir = File.createTempFile("tmp", "", getTemporaryDirectory());
@@ -205,6 +207,14 @@ public class ProjectGenerator {
 		rootDir.mkdirs();
 
 		File dir = initializerProjectDir(rootDir, request);
+		
+		if (request.hasWebFacet() && dependencies.stream().anyMatch((d) -> d.getId().equals("gwt"))){
+			String gwtModuleName = request.getArtifactId().replace("\\d", "").replaceAll("[^a-zA-Z0-9]", "");
+			
+			model.put("hasGWTDependency", true);
+			model.put("gwtModuleName", gwtModuleName);
+			model.put("gwtModuleLongName", request.getPackageName()+"."+gwtModuleName);
+		}
 
 		if (isGradleBuild(request)) {
 			String gradle = new String(doGenerateGradleBuild(model));
@@ -229,10 +239,12 @@ public class ProjectGenerator {
 		String extension = ("kotlin".equals(language) ? "kt" : language);
 		write(new File(src, applicationName + "." + extension),
 				"Application." + extension, model);
+		
+			   
 
 		if ("war".equals(request.getPackaging())) {
 			String fileName = "ServletInitializer." + extension;
-			write(new File(src, fileName), fileName, model);
+			write(new File("src/main"), fileName, model);
 		}
 
 		File test = new File(new File(dir, "src/test/" + codeLocation),
@@ -245,11 +257,33 @@ public class ProjectGenerator {
 		File resources = new File(dir, "src/main/resources");
 		resources.mkdirs();
 		writeText(new File(resources, "application.properties"), "");
+		
+	
+		
+	
 
 		if (request.hasWebFacet()) {
 			new File(dir, "src/main/resources/templates").mkdirs();
-			new File(dir, "src/main/resources/static").mkdirs();
+			File staticDirectory = new File(dir, "src/main/resources/static");
+			
+			staticDirectory.mkdirs();
+			//GWT can only be present with web facet
+			if( dependencies.stream().anyMatch((d) -> d.getId().equals("gwt"))){
+				
+				
+				File gwtSubPackage = new File(src, "gwt");
+				gwtSubPackage.mkdir();
+				
+				write(new File(gwtSubPackage, "GwtAppEntryPoint.java"),
+						"GwtAppEntryPoint.java", model);
+				write(new File(dir, "src/main/module.gwt.xml"), "module.gwt.xml", model);
+				
+				write(new File(staticDirectory, model.get("gwtModuleName")+".html"), "index.html", model);
+			}
+			
 		}
+		
+		
 		publishProjectGeneratedEvent(request);
 		return rootDir;
 
@@ -329,12 +363,23 @@ public class ProjectGenerator {
 		Map<String, Object> model = new LinkedHashMap<>();
 		InitializrMetadata metadata = metadataProvider.get();
 
+
 		ProjectRequest request = requestResolver.resolve(originalRequest, metadata);
+		
+		
 
 		// request resolved so we can log what has been requested
 		List<Dependency> dependencies = request.getResolvedDependencies();
 		List<String> dependencyIds = dependencies.stream().map(Dependency::getId)
 				.collect(Collectors.toList());
+		
+		if(dependencyIds.contains("gwt")){
+			if(!"java".equals(request.getLanguage()))
+			   throw new InvalidProjectRequestException("GWT is only compatible with Java language");
+			else if(!isJavaVersion(request, "1.8"))
+				throw new InvalidProjectRequestException("GWT 2.8 is only compatible with Java 1.8");
+		}
+		
 		log.info("Processing request{type=" + request.getType() + ", dependencies="
 				+ dependencyIds);
 
