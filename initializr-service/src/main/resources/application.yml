@@ -81,7 +81,7 @@ initializr:
         groupId: com.stormpath.sdk
         artifactId: stormpath-bom
         versionProperty: stormpath.version
-        version: 1.5.2
+        version: 1.5.2 
       keycloak:
         groupId: org.keycloak.bom
         artifactId: keycloak-adapter-bom
@@ -304,10 +304,10 @@ initializr:
               href: https://vaadin.com/spring
         - name: GWT
           id: gwt
-          groupId: com.gwidgets
-          artifactId: gwt-spring-boot-starter
-          version: 1.0-SNAPSHOT
-          type: pom
+          groupId: com.google.gwt
+          artifactId: gwt-user
+          version: 2.8.0
+          scope: provided
           description: GWT framework (version 2.8.0)
         - name: Rest Repositories
           id: data-rest

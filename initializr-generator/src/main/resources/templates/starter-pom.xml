@@ -264,6 +264,13 @@
 	<profiles>
 		<profile>
 			<id>gwt-dev</id>
+			<dependencies>
+			 <dependency>
+			  <groupId>com.google.gwt</groupId>
+			  <artifactId>gwt-dev</artifactId>
+			  <version>{{gwtVersion}}</version>
+			 </dependency>
+			</dependencies>
 			<build>
 				<resources>
 					<resource>
@@ -299,6 +306,13 @@
 		</profile>
 		<profile>
 			<id>gwt-prod</id>
+				<dependencies>
+				 <dependency>
+				  <groupId>com.google.gwt</groupId>
+				  <artifactId>gwt-dev</artifactId>
+				  <version>{{gwtVersion}}</version>
+				 </dependency>
+				</dependencies>
 			<build>
 				<resources>
 					<resource>
@@ -348,7 +362,6 @@
 							</startupUrls>
 							<classpathScope>compile</classpathScope>
 							<webappDirectory>${basedir}/src/main/resources/static</webappDirectory>
-							<workDir>${basedir}/src/main/resources/static</workDir>
 							<warDir>${basedir}/src/main/resources/static</warDir>
 						</configuration>
 					</plugin>

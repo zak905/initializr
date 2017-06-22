@@ -208,12 +208,16 @@ public class ProjectGenerator {
 
 		File dir = initializerProjectDir(rootDir, request);
 		
-		if (request.hasWebFacet() && dependencies.stream().anyMatch((d) -> d.getId().equals("gwt"))){
+		boolean hasGWT = request.getResolvedDependencies().stream().anyMatch((d) -> d.getId().equals("gwt"));
+		
+		if (request.hasWebFacet() && hasGWT){
 			String gwtModuleName = request.getArtifactId().replace("\\d", "").replaceAll("[^a-zA-Z0-9]", "");
+			
 			
 			model.put("hasGWTDependency", true);
 			model.put("gwtModuleName", gwtModuleName);
 			model.put("gwtModuleLongName", request.getPackageName()+"."+gwtModuleName);
+			model.put("gwtVersion", request.getResolvedDependencies().stream().filter(dependency -> "gwt".equals(dependency.getId())).findFirst().get().getVersion());
 		}
 
 		if (isGradleBuild(request)) {
@@ -268,7 +272,9 @@ public class ProjectGenerator {
 			
 			staticDirectory.mkdirs();
 			//GWT can only be present with web facet
-			if( dependencies.stream().anyMatch((d) -> d.getId().equals("gwt"))){
+			if( hasGWT){
+				
+				
 				
 				
 				File gwtSubPackage = new File(src, "gwt");
